@@ -5,12 +5,10 @@ import * as posenet from "@tensorflow-models/posenet";
 import Webcam from "react-webcam";
 import { drawKeypoints, drawSkeleton } from "./utilities";
 import Notifier from "react-desktop-notification"
-import { Button, Navbar, Nav, NavDropdown, Form, FormControl, Spinner } from 'react-bootstrap';
+import { Button, Navbar, Nav, NavDropdown, Form, FormControl, Spinner, ButtonGroup } from 'react-bootstrap';
 var classNames = require('classnames');
 
 export default function App() {
-  const bounds = .15;
-  const slouchBound = 20;
   const [shoulderSlope, setShoulderSlope] = useState(0);
   const [shoulderSlopeOffset, setShoulderSlopeOffset] = useState(0);
 
@@ -18,11 +16,10 @@ export default function App() {
   const [headSlopeOffset, setHeadSlopeOffset] = useState(0);
   const [shoulderY, setShoulderY] = useState(0)
   const [shoulderYOffset, setShoulderYOffset] = useState(0)
-  const [setPrefs, setSetPrefs] = useState(false)
   const webcamRef = React.useRef(null);
   const canvasRef = React.useRef(null);
   const [numIssues, setNumIssues] = useState(-1)
-
+  const [weights, setWeights] = useState([.15,.15,.15])
 
   const detectWebcamFeed = async (posenet_model) => {
     if (
@@ -31,7 +28,7 @@ export default function App() {
       webcamRef.current.video.readyState === 4
     ) {
       var count = parseInt(localStorage.getItem('count')) || 0
-      var settings = (localStorage.getItem('settings') || "0,0,0").split(",") //shoulder tilt, head tilt, slouch
+      var settings = (localStorage.getItem('settings') || ".15,.15,.15").split(",") //shoulder tilt, head tilt, slouch
       var shoulderTiltSetting = settings[0]
       var headTiltSetting = settings[1]
       var slouchSetting = settings[2]
@@ -47,11 +44,11 @@ export default function App() {
       var leftS = pose["keypoints"][5]["position"]
       var rightS = pose["keypoints"][6]["position"]
       var shoulderSlope = (rightS['y'] - leftS['y']) / (rightS['x'] - leftS['x'])
-   
+
       var shoY = Math.round((rightS['y'] + leftS['y']) / 2)
       setShoulderY(shoY)
-      setShoulderYOffset(Math.round((shoY - slouchSetting) * 1.5))
-
+      setShoulderYOffset(calcShoulderYOffset(shoY,slouchSetting))
+      // setShoulderYOffset((shoY,slouchSetting))
       setShoulderSlope(Math.round(shoulderSlope * 100) / 100)
       setShoulderSlopeOffset(Math.round((shoulderTiltSetting - shoulderSlope) * 100) / 100)
 
@@ -63,9 +60,22 @@ export default function App() {
       setHeadSlope(Math.round(headSlope * 100) / 100)
       setHeadSlopeOffset(Math.round((headTiltSetting - headSlope) * 100) / 100)
 
-      var shoulderIssue = Math.abs(shoulderSlope - shoulderTiltSetting) > bounds
-      var headIssue = Math.abs(headSlope - headTiltSetting) > bounds
-      var postureIssue = Math.abs(shoY - slouchSetting) > slouchBound
+
+      var weights = (localStorage.getItem('weights') || ".15,.15,.15").split(",") //shoulder tilt, head tilt, slouch
+      var shoulderTiltWeight = weights[0]
+      var headTiltWeight = weights[1]
+      var slouchWeight = weights[2]
+
+      var tempweights = [];
+      tempweights.push(shoulderTiltWeight)
+      tempweights.push(headTiltWeight)
+      tempweights.push(slouchWeight)
+      setWeights(tempweights)
+
+      var shoulderIssue = Math.abs(shoulderSlope - shoulderTiltSetting) > shoulderTiltWeight
+      var headIssue = Math.abs(headSlope - headTiltSetting) > headTiltWeight
+      var postureIssue = calcShoulderYOffset(shoY,slouchSetting) > slouchWeight
+
       var issuesArray = [];
       issuesArray.push(shoulderIssue ? 1 : 0)
       issuesArray.push(headIssue ? 1 : 0)
@@ -91,7 +101,7 @@ export default function App() {
       drawResult(pose, video, videoWidth, videoHeight, canvasRef);
     }
   };
-
+  
   const changeSetPrefs = () => {
     console.log("Saving settings")
     localStorage.setItem('count', 0) //reset count
@@ -129,20 +139,65 @@ export default function App() {
     }, 3000);
   }, []);
 
+  function calcShoulderYOffset(a,b){
+    var output =  (Math.round(((a/25) - (b/25))*100)/100)
+    console.log(output)
+    return output
+ 
+   }
   //calculate shoulder slope
   const drawResult = (pose, video, videoWidth, videoHeight, canvas) => {
     const ctx = canvas.current.getContext("2d");
     canvas.current.width = videoWidth;
     canvas.current.height = videoHeight;
     drawKeypoints(pose["keypoints"], .3, ctx);
-    drawSkeleton(pose["keypoints"], 0.3, ctx);
   };
+
+  function changeWeight(item,increment){ //0 - shoulder tilt , 1 - head tilt, 2 - slouch, boolean
+    console.log(item + " t " + increment)
+    var weights = (localStorage.getItem('weights') || ".15,.15,.15").split(",") //shoulder tilt, head tilt, slouch
+    console.log(weights[1])
+    console.log(weights)
+    console.log(parseFloat(weights[1]))
+    var shoulderTiltWeight =  Math.round(parseFloat(weights[0]) * 100) / 100
+    var headTiltWeight =  Math.round(parseFloat(weights[1]) * 100) / 100
+    var slouchWeight =  Math.round(parseFloat(weights[2]) * 100) / 100
+    if(item == 0){ //shoulder tilt
+
+      if(increment && shoulderTiltWeight <= .9){
+        console.log("increasing")
+        shoulderTiltWeight += .1;
+      }else if(!increment && shoulderTiltWeight > .1){
+        shoulderTiltWeight -= .1;
+      }
+    }else if(item == 1 ){ //head tilt
+      if(increment &&  headTiltWeight <= .9){
+        headTiltWeight += .1;
+      }else if(!increment && headTiltWeight > .1){
+        headTiltWeight -= .1;
+      }
+    }else if(item == 2){
+      if(increment &&  slouchWeight <= .9){
+        slouchWeight += .1;
+      }else if(!increment && slouchWeight > .1){
+        slouchWeight -= .1;
+      }
+    }
+    var newWeights = [];
+    newWeights.push(Math.round(parseFloat(shoulderTiltWeight) * 100) / 100)
+    newWeights.push(Math.round(parseFloat(headTiltWeight) * 100) / 100)
+    newWeights.push(Math.round(parseFloat(slouchWeight) * 100) / 100)
+    console.log("new weights " + newWeights)
+    setWeights(newWeights)
+    localStorage.setItem('weights', String(newWeights).replaceAll("[", "").replaceAll("]", ""));
+  }
+
 
   var statuses = new Map([
     [0, "Good"],
-    [1, "Ok"],
-    [2, "Fair"],
-    [3, "Poor"],
+    [1, "Fair"],
+    [2, "Bad"],
+    [3, "Very Bad"],
   ]);
   var button1 = classNames(
     'primary',
@@ -150,7 +205,12 @@ export default function App() {
       'disabled': numIssues == -1
     }
   );
-
+  var button2 = classNames(
+    'danger',
+    {
+      'disabled': numIssues == -1
+    }
+  );
   let spinner;
 
   if (numIssues == -1) {
@@ -193,6 +253,7 @@ export default function App() {
         {/* <Button variant="danger">Reset</Button>{' '} */}
         <Button onClick={sendNotification} variant="secondary">Test Notification</Button>{' '}
         <h1></h1>
+
         <br></br>
         <Webcam
           ref={webcamRef}
@@ -222,6 +283,35 @@ export default function App() {
             height: 480
           }}
         />
+         <h4 style={{ marginTop: "15px"}}>Sensitivity Adjustment</h4>
+        <div style={{ display: "flex", justifyContent: "space-around", padding: "10px", marginTop: "10px" }}>
+         
+          <div>
+            <p>Shoulder Tilt</p>
+            <p>{weights[0]}</p>
+            <ButtonGroup>
+              <Button onClick={() => changeWeight(0,false)} variant={button2}>-</Button>
+              <Button onClick={() => changeWeight(0,true)} variant={button2}>+</Button>
+            </ButtonGroup>
+          </div>
+
+          <div>
+            <p>Head Tilt</p>
+            <p>{weights[1]}</p>
+            <ButtonGroup>
+              <Button onClick={() => changeWeight(1,false)} variant={button2}>-</Button>
+              <Button onClick={() => changeWeight(1,true)} variant={button2}>+</Button>
+            </ButtonGroup>
+          </div>
+          <div>
+            <p>Shoulder Alignment</p>
+            <p>{weights[2]}</p>
+            <ButtonGroup>
+              <Button onClick={() => changeWeight(2,false)} variant={button2}>-</Button>
+              <Button onClick={() => changeWeight(2,true)} variant={button2}>+</Button>
+            </ButtonGroup>
+          </div>
+        </div>
       </header>
       <br></br>
       <p style={{ color: "grey", fontSize: "17px" }}>Made By Joseph Shepin</p>
