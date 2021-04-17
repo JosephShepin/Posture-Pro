@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "./styles.css";
 // import * as tf from "@tensorflow/tfjs";
 import * as posenet from "@tensorflow-models/posenet";
@@ -10,13 +10,15 @@ import sound from './sounds/effect.mp3';
 // or less ideally
 import { Button } from 'react-bootstrap';
 export default function App() {
-  const bounds = .2;
-  const x = 0;
+
+  const bounds = .1;
   const [shoulderSlope, setShoulderSlope] = useState(0);
   const [headSlope, setHeadSlope] = useState(0);
+  const [count, setCount] = useState(0);
+  const [shoulderY, setShoulderY] = useState(0)
   const [play] = useSound(sound);
   const [intervalCount, setIntervalCount] = useState(0);
-
+  const [setPrefs, setSetPrefs] = useState(false)
   const webcamRef = React.useRef(null);
   const canvasRef = React.useRef(null);
 
@@ -28,6 +30,7 @@ export default function App() {
       webcamRef.current !== null &&
       webcamRef.current.video.readyState === 4
     ) {
+      setCount(new Date().getSeconds())
       console.log("runnig")
 
       // Get Video Properties
@@ -44,26 +47,48 @@ export default function App() {
       // console.log(leftS)
       var shoulderSlope = (rightS['y'] - leftS['y']) / (rightS['x'] - leftS['x'])
       // console.log(slope)
-      // setShoulderSlope(Math.round(shoulderSlope*100)/100)
+      var shouldY = (rightS['y'] + leftS['y'])/2
+      if((shoulderY - shouldY) > 50){
+        console.log("slouching")
+        
+      }
 
-      // var leftEar = pose["keypoints"][3]["position"]
-      // var rightEar = pose["keypoints"][4]["position"]
-      // var headSlope = (rightEar['y'] - leftEar['y'])/(rightEar['x'] - leftEar['x'])
-      // setHeadSlope(Math.round(headSlope*100)/100)
-      // if(Math.abs(shoulderSlope) > bounds || Math.abs(headSlope) > bounds){
-      //   // console.log(intervalCount)
-      //   setIntervalCount(intervalCount+1)
-      // }
-      // if(intervalCount >= 2){
-      //   console.log("PLAYING SOUND")
-      //   sound()
-      //   // setIntervalCount(0);
-      // }
+      console.log(setPrefs)
+      setShoulderSlope(Math.round(shoulderSlope * 100) / 100)
+
+      var leftEar = pose["keypoints"][3]["position"]
+      var rightEar = pose["keypoints"][4]["position"]
+      var headSlope = (rightEar['y'] - leftEar['y']) / (rightEar['x'] - leftEar['x'])
+      setHeadSlope(Math.round(headSlope * 100) / 100)
+      if (Math.abs(shoulderSlope) > bounds || Math.abs(headSlope) > bounds) {
+        console.log("increasing count " + intervalCount)
+        setCount(10)
+        console.log("new count " + intervalCount)
+
+      }
+      play()
+      console.log("interval count is " + count)
+      if (count > 2) {
+        console.log("PLAYING SOUND")
+        setCount(0);
+      }
+
+
       drawResult(pose, video, videoWidth, videoHeight, canvasRef);
 
     }
   };
 
+
+
+
+  const changeSetPrefs  = () => {
+    setSetPrefs(true)
+  }
+
+  // useEffect(() => {
+
+  // },[])
   const runPosenet = async () => {
     const posenet_model = await posenet.load({
       inputResolution: { width: 640, height: 480 },
@@ -71,19 +96,32 @@ export default function App() {
     });
     //
 
-    setInterval(() => {
-      detectWebcamFeed(posenet_model);
-    }, 2500);
+    return posenet_model;
   };
+  var model;
 
-  runPosenet();
+  runPosenet().then((posenet_model) => {
+    model = posenet_model;
+  });
+
+
+  useEffect(() => {
+    setInterval(() => {
+      // setHeadSlope(2)
+      detectWebcamFeed(model);
+    }, 4500);
+
+  }, []);
+  
+
+
   //calculate shoulder slope
   const drawResult = (pose, video, videoWidth, videoHeight, canvas) => {
     const ctx = canvas.current.getContext("2d");
     canvas.current.width = videoWidth;
     canvas.current.height = videoHeight;
-    drawKeypoints(pose["keypoints"], 0.3, ctx);
-    drawSkeleton(pose["keypoints"], 0.3, ctx);
+    drawKeypoints(pose["keypoints"], .1, ctx);
+    drawSkeleton(pose["keypoints"], 0.1, ctx);
   };
 
 
@@ -92,14 +130,14 @@ export default function App() {
       <header className="App-header">
         <h1>Welcome to PosScan</h1>
         <h3 style={{ display: "inline-block", }}>Posture&nbsp;</h3><h3 style={{ display: "inline-block", }}>Good</h3>
-<br></br>
+        <br></br>
         <p>shoulder tilt {shoulderSlope}</p>
         <p>head tilt {headSlope}</p>
         <p>slouch {headSlope}</p>
-        <Button variant="primary">Set Preferred Posture</Button>{' '}
+        <Button variant="primary" onClick={changeSetPrefs}>Set Preferred Posture</Button>{' '}
         <Button variant="danger">Reset</Button>{' '}
-        <Button variant="secondary">Sounds On</Button>{' '}
-
+        <Button onClick={play} variant="secondary">Test Sounds</Button>{' '}
+        <h1>{count}</h1>
         <br></br>
         <br></br>
         <Webcam
@@ -132,7 +170,6 @@ export default function App() {
         />
 
       </header>
-
     </div>
   );
 }
