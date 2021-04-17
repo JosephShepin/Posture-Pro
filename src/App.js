@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import "./styles.css";
-import * as tf from "@tensorflow/tfjs";
+// import * as tf from "@tensorflow/tfjs";
 import * as posenet from "@tensorflow-models/posenet";
 import Webcam from "react-webcam";
 import { drawKeypoints, drawSkeleton } from "./utilities";
@@ -12,7 +12,7 @@ export default function App() {
   const webcamRef = React.useRef(null);
   const canvasRef = React.useRef(null);
 
-  const storedPose = {};
+  // const storedPose = {};
 
   const detectWebcamFeed = async (posenet_model) => {
     if (
@@ -41,7 +41,7 @@ export default function App() {
       var headSlope = (rightEar['y'] - leftEar['y'])/(rightEar['x'] - leftEar['x'])
       setHeadSlope(Math.round(headSlope*100)/100)
 
-      drawResult(pose, video, videoWidth, videoHeight, canvasRef);
+      // drawResult(pose, video, videoWidth, videoHeight, canvasRef);
     
     }
   };
