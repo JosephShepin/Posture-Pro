@@ -1,5 +1,6 @@
-## Posture Pro is an advanced posture detection and correction web app that dynamically determines your position in the 3D space of your head and shoulders, and back to accurately remind you when you need to fix your posture.
-Posture Pro runs in the background of your various work activities and sends discrete reminders when you need to fix your posture. 
+## Posture Pro is a vision-powered posture detection web app that effectively helps people reduce the risks of injury and pain related to poor posture.
+
+Posture Pro analyzes your posture in real-time and provides output and notifications to remind you to sit straight. 
 
 <div style="display:flex;">
 
