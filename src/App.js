@@ -116,7 +116,7 @@ export default function App() {
 
   const sendNotification = () => {
     Notification.requestPermission();
-    Notifier.start("Check your posture", "You have been sitting poorly for the last minute. Consider repositioning", "www.google.com", "https://i.ibb.co/zZBZcFv/Untitled-design.png");
+    Notifier.start("Check your posture", "You have been sitting poorly for the last minute. Consider repositioning", "", "https://i.ibb.co/fGbcBtW/logo.png");
   }
 
   const runPosenet = async () => {
@@ -229,17 +229,20 @@ export default function App() {
   return (
     <div className="App" >
       <Navbar bg="light" expand="lg">
-        <Navbar.Brand href="#home">Poscan</Navbar.Brand>
+        <Navbar.Brand >Posture Pro</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#link">App</Nav.Link>
+            <Nav.Link>Home</Nav.Link>
+            <Nav.Link >App</Nav.Link>
           </Nav>
         </Navbar.Collapse>
+        <Nav className="mr-auto">
+            <Nav.Link href='https://github.com/jshepin/hackVH'>View the project on github</Nav.Link>
+          </Nav>
       </Navbar>
-      <header className="App-header" style={{ background: "#f8f9fa", borderRadius: "10px", padding: "10px", maxWidth: "800px", margin: "auto", marginTop: "10px" }}>
-        <h1>Welcome to PosScan</h1>
+      <header className="App-header" style={{ background: "#f8f9fa", borderRadius: "10px", padding: "15px", paddingTop: "20px", maxWidth: "800px", margin: "auto", marginTop: "30px" }}>
+        <h1 style={{fontSize:"35px"}}>Welcome to Posture Pro</h1>
 
         {spinner}
 
