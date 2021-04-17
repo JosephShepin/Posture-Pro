@@ -6,7 +6,7 @@ Posture Pro runs in the background of your various work activities and sends dis
 <img  width="350"  src="https://storage.googleapis.com/posture-pro-images/good_posture.png" border="0">
 <img  width="350"  src="https://storage.googleapis.com/posture-pro-images/bad_posture.png" border="0">
 
-
+## Features
 - Personalized start position of ideal posture
 - Sensitivity adjustment
 - Background desktop notifications
