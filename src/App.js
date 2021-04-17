@@ -93,7 +93,7 @@ export default function App() {
         count = count + 1
         localStorage.setItem('count', count);
       }
-      if (count > 10) {
+      if (count > 30) {
         console.log("sending notification")
         localStorage.setItem('count', 0) //reset count
         sendNotification()
@@ -136,7 +136,7 @@ export default function App() {
     detectWebcamFeed(model);
     setInterval(() => {
       detectWebcamFeed(model);
-    }, 3000);
+    }, 1000);
   }, []);
 
   function calcShoulderYOffset(a,b){
