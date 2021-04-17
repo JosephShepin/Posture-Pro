@@ -6,16 +6,16 @@ import Webcam from "react-webcam";
 import { drawKeypoints, drawSkeleton } from "./utilities";
 import useSound from 'use-sound';
 import sound from './sounds/effect.mp3';
+import Notifier from "react-desktop-notification"
 
 // or less ideally
 import { Button } from 'react-bootstrap';
 export default function App() {
-
   const bounds = .1;
   const [shoulderSlope, setShoulderSlope] = useState(0);
   const [headSlope, setHeadSlope] = useState(0);
   const [count, setCount] = useState(0);
-  const [shoulderY, setShoulderY] = useState(0)
+  const [shoulderY, setShoulderY] = useState(200)
   const [play] = useSound(sound);
   const [intervalCount, setIntervalCount] = useState(0);
   const [setPrefs, setSetPrefs] = useState(false)
@@ -30,6 +30,7 @@ export default function App() {
       webcamRef.current !== null &&
       webcamRef.current.video.readyState === 4
     ) {
+
       setCount(new Date().getSeconds())
       console.log("runnig")
 
@@ -47,11 +48,13 @@ export default function App() {
       // console.log(leftS)
       var shoulderSlope = (rightS['y'] - leftS['y']) / (rightS['x'] - leftS['x'])
       // console.log(slope)
-      var shouldY = (rightS['y'] + leftS['y'])/2
-      if((shoulderY - shouldY) > 50){
-        console.log("slouching")
-        
-      }
+      var shouldY = (rightS['y'] + leftS['y']) / 2
+      
+      // if ((shoulderY - shouldY) > 50) {
+      //   console.log("slouching")
+
+      // }
+      setShoulderY(Math.round((shoulderY - shouldY)/10))
 
       console.log(setPrefs)
       setShoulderSlope(Math.round(shoulderSlope * 100) / 100)
@@ -62,28 +65,28 @@ export default function App() {
       setHeadSlope(Math.round(headSlope * 100) / 100)
       if (Math.abs(shoulderSlope) > bounds || Math.abs(headSlope) > bounds) {
         console.log("increasing count " + intervalCount)
-        setCount(10)
+        // setCount(10)
         console.log("new count " + intervalCount)
-
       }
-      play()
+
+      // play()
       console.log("interval count is " + count)
       if (count > 2) {
         console.log("PLAYING SOUND")
-        setCount(0);
+        // setCount(0);
       }
-
-
       drawResult(pose, video, videoWidth, videoHeight, canvasRef);
-
     }
   };
 
 
 
 
-  const changeSetPrefs  = () => {
-    setSetPrefs(true)
+  const changeSetPrefs = () => {
+    // setSetPrefs(true)
+    Notification.requestPermission();
+    Notifier.start("Title","Here is context","www.google.com","validated image url");
+
   }
 
   // useEffect(() => {
@@ -112,7 +115,7 @@ export default function App() {
     }, 4500);
 
   }, []);
-  
+
 
 
   //calculate shoulder slope
@@ -133,10 +136,10 @@ export default function App() {
         <br></br>
         <p>shoulder tilt {shoulderSlope}</p>
         <p>head tilt {headSlope}</p>
-        <p>slouch {headSlope}</p>
+        <p>slouch {shoulderY}</p>
         <Button variant="primary" onClick={changeSetPrefs}>Set Preferred Posture</Button>{' '}
         <Button variant="danger">Reset</Button>{' '}
-        <Button onClick={play} variant="secondary">Test Sounds</Button>{' '}
+        <Button onClick={changeSetPrefs} variant="secondary">Test Notification</Button>{' '}
         <h1>{count}</h1>
         <br></br>
         <br></br>
