@@ -8,10 +8,12 @@
     "@tensorflow-models/posenet": "2.2.1",
     "@tensorflow/tfjs": "2.6.0",
     "bootstrap": "^4.6.0",
+    "classnames": "^2.3.1",
     "react": "17.0.0",
     "react-bootstrap": "^1.5.2",
     "react-desktop-notification": "^1.0.9",
     "react-dom": "17.0.0",
+    "react-router": "^5.2.0",
     "react-scripts": "3.4.3",
     "react-webcam": "5.2.1",
     "use-sound": "^2.0.2"

@@ -26,6 +26,11 @@ export const tryResNetButtonText = "[New] Try ResNet50";
 const tryResNetButtonTextCss = "width:100%;text-decoration:underline;";
 const tryResNetButtonBackgroundCss = "background:#e61d5f;";
 
+function generateColors(){
+  var colors = ["white"]
+  return colors[Math.floor(Math.random() * colors.length)];
+
+}
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
 }
@@ -112,7 +117,7 @@ export function drawSkeleton(keypoints, minConfidence, ctx, scale = 1) {
     drawSegment(
       toTuple(keypoints[0].position),
       toTuple(keypoints[1].position),
-      color,
+      generateColors(),
       scale,
       ctx
     );
@@ -131,7 +136,7 @@ export function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
     }
 
     const { y, x } = keypoint.position;
-    drawPoint(ctx, y * scale, x * scale, 3, color);
+    drawPoint(ctx, y * scale, x * scale, 3, generateColors());
   }
 }
 
@@ -214,7 +219,7 @@ function drawPoints(ctx, points, radius, color) {
     if (pointX !== 0 && pointY !== 0) {
       ctx.beginPath();
       ctx.arc(pointX, pointY, radius, 0, 2 * Math.PI);
-      ctx.fillStyle = color;
+      ctx.fillStyle = generateColors();
       ctx.fill();
     }
   }
