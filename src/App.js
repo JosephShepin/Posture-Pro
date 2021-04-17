@@ -85,8 +85,7 @@ export default function App() {
   const changeSetPrefs = () => {
     // setSetPrefs(true)
     Notification.requestPermission();
-    Notifier.start("Title","Here is context","www.google.com","validated image url");
-
+    Notifier.start("Check your posture","You have been sitting poorly for the last minute. Consider repositioning","www.google.com","https://i.ibb.co/zZBZcFv/Untitled-design.png");
   }
 
   // useEffect(() => {
@@ -123,8 +122,8 @@ export default function App() {
     const ctx = canvas.current.getContext("2d");
     canvas.current.width = videoWidth;
     canvas.current.height = videoHeight;
-    drawKeypoints(pose["keypoints"], .1, ctx);
-    drawSkeleton(pose["keypoints"], 0.1, ctx);
+    drawKeypoints(pose["keypoints"], .3, ctx);
+    drawSkeleton(pose["keypoints"], 0.3, ctx);
   };
 
 
