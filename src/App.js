@@ -7,6 +7,8 @@ import { drawKeypoints, drawSkeleton } from "./utilities";
 import useSound from 'use-sound';
 import sound from './sounds/effect.mp3';
 
+// or less ideally
+import { Button } from 'react-bootstrap';
 export default function App() {
   const bounds = .2;
   const x = 0;
@@ -69,7 +71,6 @@ export default function App() {
     });
     //
 
-
     setInterval(() => {
       detectWebcamFeed(posenet_model);
     }, 2500);
@@ -87,14 +88,18 @@ export default function App() {
 
 
   return (
-    <div className="App" style={{background:"#EAEDED", borderRadius: "10px", padding: "10px", maxWidth: "800px", margin: "auto"}}>
+    <div className="App" style={{ background: "#EAEDED", borderRadius: "10px", padding: "10px", maxWidth: "800px", margin: "auto", marginTop: "10px" }}>
       <header className="App-header">
         <h1>Welcome to PosScan</h1>
-        <h3 style={{display:"inline-block",}}>Posture&nbsp;</h3><h3 style={{display:"inline-block",}}>Good</h3>
-
+        <h3 style={{ display: "inline-block", }}>Posture&nbsp;</h3><h3 style={{ display: "inline-block", }}>Good</h3>
+<br></br>
         <p>shoulder tilt {shoulderSlope}</p>
         <p>head tilt {headSlope}</p>
-        <button>Set prefered posture</button>
+        <p>slouch {headSlope}</p>
+        <Button variant="primary">Set Preferred Posture</Button>{' '}
+        <Button variant="danger">Reset</Button>{' '}
+        <Button variant="secondary">Sounds On</Button>{' '}
+
         <br></br>
         <br></br>
         <Webcam
